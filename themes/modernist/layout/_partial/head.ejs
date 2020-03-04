@@ -28,24 +28,13 @@
   %>
   <title><%= title %></title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
-  <%
-    let keywords = theme.keywords, tmp = [];
-
-    if (page.tags && page.tags.length) {
-      page.tags.forEach(function(tag) {
-        tmp.push(tag.name);
-      });
-
-      keywords = tmp.join(',');
-    }
-  %>
-  <meta name="keywords" content=<%= keywords %>>
+  <% if (config.keywords){ %>
+  <meta name="keywords" content="<%= config.keywords %>">
+  <% } %>
   <% if (config.description){ %>
     <meta name="description" content="<%= config.description %>">
   <% } %>
-  <% if (theme.favicon){ %>
-    <link rel="shortcut icon" type="image/x-icon" href="<%= url_for(theme.favicon) %>?v=1.02">
-  <% } %>
+  <link rel="shortcut icon" type="image/x-icon" href="<%= url_for(theme.favicon) %>?v=1.02">
 
   <%- css('/css/style.css') %>
   <script type="text/javascript" src="/js/scale.fix.js"></script>
