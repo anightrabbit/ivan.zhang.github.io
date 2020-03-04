@@ -1,0 +1,9 @@
+<footer>
+  <p>&copy; <%= date(new Date(), 'YYYY') %>
+  <% if (config.author) { %>
+  <a href="mailto:<%= config.author %>" class="author">
+    <%= config.author%>
+  </a>
+  <%}%>
+  </p>
+</footer>
