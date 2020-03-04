@@ -125,8 +125,11 @@ body {
 }
 header,
 section,
-footer {
+footer,
+figure {
   display: block;
+  padding: 0;
+  margin: 0;
 }
 a {
   color: #069;
