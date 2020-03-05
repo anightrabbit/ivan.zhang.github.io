@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html>
+  <!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta http-equiv="content-type" content="text/html; charset=utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=Edge,chrome=1">
+  
+  <title>新冠病毒确诊患者同乘信息查询API - 大海的世界全是水</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
+  
+  <meta name="keywords" content="记录大海的撸码生活">
+  
+  
+    <meta name="description" content="anightrabbit@qq.com,记录,笔记">
+  
+  <link rel="shortcut icon" type="image/x-icon" href="/blog/favicon.ico?v=1.02">
+
+  
+<link rel="stylesheet" href="/blog/css/style.css">
+
+  <script type="text/javascript" src="/blog/js/scale.fix.js"></script>
+  <!--[if lt IE 9]>
+    <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+<meta name="generator" content="Hexo 4.2.0"></head>
+  <body>
+    <div class="wrapper">
+      <header>
+  <h1>大海的世界全是水</h1>
+  
+  <p>记录大海的撸码生活</p>
+  
+</header>
+<section class="post">
+  <div class="post-title">
+    <h2 class="article-title">新冠病毒确诊患者同乘信息查询API</h2>
+  </div>
+   <div class="post-meta">
+    <span class="post-time">2020-03-05</span>
+  </div>
+  <div class="post-content">
+    <p>本着快速开发的想法，选择自己最熟悉的开发环境和工具。<br>采用Nodejs的Express框架搭配MongoDB数据库，来构建这个关于新冠病毒确诊患者同乘信息查询的API服务。</p>
+<h3 id="1、创建项目2019ncov-tool"><a href="#1、创建项目2019ncov-tool" class="headerlink" title="1、创建项目2019ncov-tool"></a>1、创建项目2019ncov-tool</h3><p>先在github上创建一个名为2019ncov-tool的新项目，然后在本地完善</p>
+<pre><code>$ git clone https://github.com/anightrabbit/2019ncov-tool.git
+$ cd 2019ncov-tool
+$ express --git --force
+$ npm i</code></pre><p>在这基础上也可以移除一些不需要的文件(目录)，比如public，views等。</p>
+<h3 id="2、配置MongoDB数据库信息"><a href="#2、配置MongoDB数据库信息" class="headerlink" title="2、配置MongoDB数据库信息"></a>2、配置MongoDB数据库信息</h3><p>在根目录下创建config目录，并在该目录下创建名为mongodb.js文件。</p>
+<pre><code>$ mkdir config &amp;&amp; cd config &amp;&amp; touch mongodb.js</code></pre><p>选择自己熟悉的<a href="https:mlab.com" target="_blank" rel="noopener">MongoDB数据库在线管理平台</a>，来管理数据。在这个平台上，免费账户提供500M的存储空间，用来测试是很合适的。</p>
+<p>依据mlab.com提供的MongoDB数据库链接方式，对mongodb.js进行数据库信息配置。<br>需要注意的地方，用户名跟密码是不能出现@、/、:、.等特殊符号，若有则需要对用户名和密码进行转码。</p>
+<pre><code>#mongodb.js
+#mongodb://&lt;dbuser&gt;:&lt;dbpassword&gt;@ds125126.mlab.com:25126/2019ncov
+var DB_user = encodeURIComponent(&apos;test&apos;);
+var DB_password = encodeURIComponent(&apos;test123456&apos;);
+var DB_url = `mongodb://${DB_user}:${DB_password}@ds125126.mlab.com:25126/2019ncov`;</code></pre><h3 id="3、创建Model"><a href="#3、创建Model" class="headerlink" title="3、创建Model"></a>3、创建Model</h3><p>在根目录下创建models目录，并在该目录下创建名为2019ncov.model.js文件</p>
+<pre><code>$ mkdir models &amp;&amp; cd models &amp;&amp; touch 2019ncov.model.js</code></pre><p>分析<a href="https://2019ncov.nosugartech.com/data.json" target="_blank" rel="noopener">数据源</a>，可定义Schema结构：</p>
+<pre><code>const NcovSchema = new Schema({
+id: {
+  type: Number,
+},
+t_date: {
+  type: String,
+},
+t_start: {
+  type: String,
+},
+t_end: {
+  type: String,
+},
+t_type: {
+  type: Number,
+  default: 0,
+},
+t_no: {
+  type: String,
+},
+t_memo: {
+  type: String,
+},
+t_no_sub: {
+  type: String,
+},
+t_pos_start: {
+  type: String,
+},
+t_pos_end: {
+  type: String,
+},
+source: {
+  type: String,
+},
+who: {
+  type: String,
+},
+verified: {
+  type: Number,
+  default: 0,
+}},{
+timestamps: {
+  createdAt: &apos;created_at&apos;,
+  updatedAt: &apos;updated_at&apos;,
+}});</code></pre><h3 id="4、创建Controller"><a href="#4、创建Controller" class="headerlink" title="4、创建Controller"></a>4、创建Controller</h3><p>在根目录下创建controllers目录，并在该目录下创建名为2019ncov.controller.js文件</p>
+<pre><code>$ mkdir controllers &amp;&amp; cd controllers &amp;&amp; touch 2019ncov.controller.js</code></pre><p>因为API服务需要支持批量更新和条件查询。其中批量更新可以使用mongoose提供的insertMany方法，而条件查询中的关键字匹配则可以采用正则来实现模糊匹配：</p>
+<pre><code>// 批量插入更新
+const record = await Model.insertMany(body);
+// 条件查询的关键字需要模糊匹配
+const reg = new RegExp(option.info, &apos;i&apos;);
+query.$or = [
+  {
+    t_no: {
+      $regex: reg,
+    },
+  },
+  {
+    t_memo: {
+      $regex: reg,
+    },
+  },
+  {
+    t_pos_start: {
+      $regex: reg,
+    },
+  },
+  {
+    t_pos_end: {
+      $regex: option.info,
+      $options: &apos;$i&apos;, // 两种书写方式
+    },
+  },
+];</code></pre><h3 id="5、创建Router"><a href="#5、创建Router" class="headerlink" title="5、创建Router"></a>5、创建Router</h3><p>在根目录下创建routes目录，并在该目录下创建名为2019ncov.route.js文件</p>
+<pre><code>$ mkdir routes &amp;&amp; cd routes &amp;&amp; touch 2019ncov.route.js</code></pre><p>因为API服务需要支持批量更新和条件查询，可与之对应定义post与get路由。</p>
+<h3 id="6、修改app-js"><a href="#6、修改app-js" class="headerlink" title="6、修改app.js"></a>6、修改app.js</h3><p>路由定义完成之后，需要引入app.js，同时引入MongoDB的相关配置信息。</p>
+<pre><code>var ncov2019 = require(&apos;./routes/2019ncov.route&apos;);
+var db = require(&apos;./config/mongodb&apos;);
+// 定义路由的路径
+app.use(&apos;/api/2019ncov&apos;, ncov2019);</code></pre><h3 id="7、调试项目"><a href="#7、调试项目" class="headerlink" title="7、调试项目"></a>7、调试项目</h3><p>运行项目之前，需要先安装项目的依赖包。</p>
+<pre><code>// 先安装依赖包
+npm i mongoose
+// 安装完成再启动
+npm run start
+// app启动成功,终端窗口会打印出
+Successfully,Mongoose connection open to mongodb://test:test123456@ds125126.mlab.com:25126/2019ncov</code></pre><p>若成功启动，通过浏览器访问地址<a href="http://localhost:3000/api/2019ncov" target="_blank" rel="noopener">http://localhost:3000/api/2019ncov</a>时，能看到：</p>
+<pre><code>{&quot;code&quot;:200,&quot;msg&quot;:&quot;查询成功&quot;,&quot;data&quot;:[],&quot;total&quot;:0}</code></pre><h3 id="8、填充数据库"><a href="#8、填充数据库" class="headerlink" title="8、填充数据库"></a>8、填充数据库</h3><p>如何把数据源的3000多条数据更新到我的数据库，一次全部更新肯定是不行的，因为mongodb一次插入的数据字符有限制的，不能超过10000个字符。因此，需要对这3000多条数据进行分组，采用多次批量更新。</p>
+<p>数据分组可以使用lodash库的chunk方法，获取数据源的数据可用axios的get方法，批量更新数据可用哪个axios的post方法。</p>
+<p>在config目录下，新建一个updatedb.js文件，完成这个填充数据库的任务。</p>
+<p>最后，可以把填充数据的命令配置到package.json文件中的scripts内，这样就可以直接通过命令行来执行批量更新数据的任务。</p>
+<pre><code>npm run updatedb
+// 初次执行终端会打印出
+originData---&gt; 3173
+dbData---&gt; 0
+chunkArray--&gt; 32
+全部更新完成</code></pre><p><a href="https://github.com/anightrabbit/2019ncov-tool" target="_blank" rel="noopener">查看完整的项目源码</a></p>
+
+  </div>
+  <div class="post-footer">
+    
+
+    <a href="#top" class="top">返回顶部</a>
+  </div>
+</section>
+
+    </div>
+    <footer>
+  <p>&copy; 2020
+  
+  <a href="mailto:盛年不重来，一日难再晨" class="author">
+    盛年不重来，一日难再晨
+  </a>
+  
+  </p>
+</footer>
+  </body>
+</html>
