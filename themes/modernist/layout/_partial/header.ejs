@@ -3,4 +3,13 @@
   <%if(config.subtitle){%>
   <p><%= config.subtitle%></p>
   <%}%>
+  <%if(theme.menu){%>
+  <ul>
+    <% for (name in theme.menu) { %>
+      <li>
+        <a href="<%- url_for(theme.menu[name]) %>"><%- __(name) %></a>
+      </li>
+    <% } %>
+  </ul>
+  <% } %>
 </header>

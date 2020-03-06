@@ -1,4 +1,3 @@
-@import 'rouge-base16-dark';
 @import url('https://fonts.googleapis.com/css?family=Lato:300italic,700italic,300,700');
 
 html {
@@ -158,6 +157,7 @@ h1, h2, h3, h4, h5, h6 {
 
 p, ul, ol, table, pre, dl {
   margin:0 0 20px;
+  padding: 0;
 }
 
 h1, h2, h3 {
@@ -263,6 +263,61 @@ footer {
     float:right;
   }
 }
+.archive {
+  .post-archive {
+    border-top: 1px solid #a5a5a5;
+    .post-item {
+      list-style: none;
+      padding: 14px 0;
+      border-bottom: 1px dashed #a5a5a5;
+      h3 {
+        margin-bottom: 0;
+      }
+      p {
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        margin-bottom: 0;
+        color: #666;
+      }
+      .post-date {
+        font-size: 14px;
+        color: #999;
+      }
+    }
+  }
+}
+
+.post {
+  .post-meta {
+    color: #8a6d3b;
+    background-color: #fcf8e3;
+    padding: 10px 20px;
+    // border-radius: 4px;
+    margin: 0 -20px 20px;
+    .post-desc {
+      margin-bottom: 0px;
+    }
+    .post-time {
+      margin:0;
+      text-align: right;
+    }
+  }
+  .post-tag-list {
+  li {
+    display: inline-block;
+    list-style: none;
+    background: #ccc;
+    padding: 0 5px;
+    border-radius: 5px;
+    margin-right: 10px;
+    a {
+      color: #666;
+    }
+  }
+}
+}
+
 
 @media print, screen and (max-width: 740px) {
   body {
