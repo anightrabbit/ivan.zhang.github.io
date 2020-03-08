@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html>
+  <!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta http-equiv="content-type" content="text/html; charset=utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=Edge,chrome=1">
+  
+  <title>新冠病毒确诊患者同乘信息查询小程序 - 大海的世界全是水</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
+  
+  <meta name="keywords" content="记录大海的撸码生活">
+  
+  
+    <meta name="description" content="anightrabbit@qq.com,记录,笔记">
+  
+  <link rel="shortcut icon" type="image/x-icon" href="/blog/favicon.ico?v=1.02">
+
+  
+<link rel="stylesheet" href="/blog/css/style.css">
+
+  <script type="text/javascript" src="/blog/js/scale.fix.js"></script>
+  <!--[if lt IE 9]>
+    <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+<meta name="generator" content="Hexo 4.2.0"></head>
+  <body>
+    <div class="wrapper">
+      <header>
+  <h1>大海的世界全是水</h1>
+  
+  <p>记录大海的撸码生活</p>
+  
+  
+  <ul>
+    
+      <li>
+        <a href="/blog/archives">归档</a>
+      </li>
+    
+  </ul>
+  
+</header>
+<section class="post">
+  <div class="post-head">
+    <h2 class="article-title">新冠病毒确诊患者同乘信息查询小程序</h2>
+    
+      <ul class="post-tag-list" itemprop="keywords"><li class="post-tag-list-item"><a class="post-tag-list-link" href="/blog/tags/2019ncov-tool/" rel="tag">2019ncov-tool</a></li><li class="post-tag-list-item"><a class="post-tag-list-link" href="/blog/tags/miniprogram/" rel="tag">miniprogram</a></li><li class="post-tag-list-item"><a class="post-tag-list-link" href="/blog/tags/wechat/" rel="tag">wechat</a></li></ul>
+    
+  </div>
+   <div class="post-meta">
+    <p class="post-desc">仿照百度城市服务的患者同乘查询工具，打造一个微信版的小程序。</p>
+    <p class="post-time">2020-03-06</p>
+  </div>
+  <div class="post-content">
+    <h3 id="1、分析小程序结构"><a href="#1、分析小程序结构" class="headerlink" title="1、分析小程序结构"></a>1、分析小程序结构</h3><p>开始撸代码之前，先思考如何组织这个小程序的结构。<br>思考的同时，尝试问自己一些问题：<br>1, 需要创建几个页面?<br>2, 这些页面之间的跳转关系？<br>3, 那些页面的内容可以抽取为组件的形式？<br>4, 那些数据可以配置为常量数据？<br>…</p>
+<pre><code>页面：
+-   index #查询页
+-   result #查询结果页
+-   tip #同行人员须知页
+组件：
+-   Search #查询页的搜索框
+-   Latest #查询页的最新消息
+-   List #查询结果页的列表
+-   FilterTab #查询结果页的筛选Tab
+常量数据
+-   出行交通[全部,飞机,火车,地铁,客运,公交车,出租车,轮船,其他]
+-   排序方式[最新发布,出行从早到晚,出行从晚到早]</code></pre><h3 id="2、创建项目2019ncov-tool-miniprogram"><a href="#2、创建项目2019ncov-tool-miniprogram" class="headerlink" title="2、创建项目2019ncov-tool-miniprogram"></a>2、创建项目2019ncov-tool-miniprogram</h3><p>先在github上创建一个名为2019ncov-tool-miniprogram的新项目，拉取至本地后，在微信开发者工具中新建项目，填入AppId。</p>
+<p>实际开发中，会先删除一些用不到的文件。最终项目结构如下：</p>
+<pre><code>$ tree
+.
+├── app.js
+├── app.json
+├── app.wxss
+├── components
+│   ├── FilterTab #查询结果页的筛选Tab
+│   ├── Latest #查询页的最新消息
+│   ├── List #查询结果页的列表
+│   └── Search #查询页的搜索框
+├── pages
+│   ├── index #查询页
+│   ├── result #查询结果页
+│   └── tip #同行人员须知页
+├── project.config.json
+├── sitemap.json
+└── utils
+    └── constant.js #常量数据
+    └── util.js
+
+11 directories, 6 files</code></pre><h3 id="3、筛选组件"><a href="#3、筛选组件" class="headerlink" title="3、筛选组件"></a>3、筛选组件</h3><p>整个项目比较简单，依据微信小程序的开发指南，在.wxml编写模板，.wxss编写样式，.js编写脚本，.json编写配置信息。稍微复杂的一点就是这个筛选组件的编写了。</p>
+<p>筛选组件的编写是先确定外部传递属性props和内部控制的data。<br>和其他库的组件编写一样，props属性传递是单向的，data的作用域仅在组件内部。</p>
+<pre><code>/**
+  * 组件的属性列表
+  */
+  properties: {
+    propData: {
+      type: Array,
+      value: []
+    },
+    propFilter: {
+      type: Object,
+      value: {}
+    }
+  },
+/**
+  * 组件的初始数据
+  */
+  data: {
+    curTabKey: &apos;&apos;,
+    curTab: {},
+    isShowPopup: false,
+    data:[],
+  },</code></pre><p>参考组件的生命周期，若需对属性值再过滤，可以在组件内ready方法内更新。<br>需要注意的是微信小程序的页面/组件更新data的属性值只能通过setData方法实现。</p>
+<pre><code>ready: function() {
+    const { propData, propFilter} = this.data;
+    if(propFilter.id) {
+      const filterData = propData[0].data.filter(item =&gt; propFilter.type == item.id);
+      propData[0].data = filterData;
+      propData[0].defaultName = filterData[0].name;
+    }
+    this.setData({
+      curTab: this.data.propFilter,
+      data: propData
+    });
+}</code></pre><p>筛选Tab组件需要的数据被定义为常量数据，定义了数据结构后，再编写模板就很简单了。</p>
+<p>最后，就是在模板上绑定事件了。</p>
+<pre><code>/**
+* 组件的方法列表
+*/
+methods: {
+    toggleTabNav: function(e) {
+      this.setData({
+        curTabKey: e.currentTarget.dataset.tab,
+        isShowPopup: true
+      });
+    },
+    closePopup: function() {
+      this.setData({
+        curTabKey: &apos;&apos;,
+        isShowPopup: false
+      });
+    },
+    toggleTabItem: function(e) {
+      const tabItem = e.currentTarget.dataset.tab;
+      const curTabKey = this.data.curTabKey;
+      if (tabItem.id === this.data.curTab[curTabKey]) return;
+      const curTab = Object.assign({},this.data.curTab);
+      curTab[curTabKey] = tabItem.id;
+      this.setData({
+        curTab,
+        curTabKey: &apos;&apos;,
+        isShowPopup: false
+      });
+      this.triggerEvent(&apos;tapbuttonevent&apos;, this.data.curTab);
+    }
+},</code></pre><p>需要注意的是，微信小程序的组件向父组件传递事件的方式。当筛选条件发生改变后，立即通知父组件。</p>
+<h3 id="4、接入API"><a href="#4、接入API" class="headerlink" title="4、接入API"></a>4、接入API</h3><p>实际开发中API可能会被多处引用，可以在util.js文件内封装一个公用接口。</p>
+<pre><code>const fetchData = (data, successCallback, failCallback) =&gt; {
+  wx.showLoading({title: &apos;加载中&apos;});
+  wx.request({
+    url: &apos;localhost:3000/api/2019ncov&apos;,
+    method: &apos;GET&apos;,
+    data,
+    success: (res) =&gt; {
+      // console.log(res);
+      if (res.data.total) {
+        const data = res.data.data.map(item =&gt; {
+          const date = new Date(item.t_date);
+          item.t_date = formatTime(date, 1);
+        });
+      }
+      successCallback &amp;&amp; successCallback(res.data);
+    },
+    fail: (res) =&gt; {
+      failCallback &amp;&amp; failCallback(res);
+      // this.setData({
+      //   latest: [],
+      //   updateTime: &apos;&apos;
+      // });
+    },
+    complete() {
+      wx.hideLoading();
+    }
+  });
+}</code></pre><p>完成API接口的封装，在项目内即可任意引用。</p>
+<h3 id="5、总结"><a href="#5、总结" class="headerlink" title="5、总结"></a>5、总结</h3><p>因为项目页面是参照<a href="https://u1qa5f.smartapps.cn/pages/epidemic/index" target="_blank" rel="noopener">百度城市服务的患者同乘查询</a>，且功能也比较简单，在实际开发中所花时间并不多，对自己的开发效率还是比较满意的。</p>
+<p><a href="https://github.com/anightrabbit/2019ncov-tool-miniprogram.git" target="_blank" rel="noopener">2019ncov-tool-miniprogram项目源码</a></p>
+
+  </div>
+  <div class="post-footer">
+    
+      <ul class="post-tag-list" itemprop="keywords"><li class="post-tag-list-item"><a class="post-tag-list-link" href="/blog/tags/2019ncov-tool/" rel="tag">2019ncov-tool</a></li><li class="post-tag-list-item"><a class="post-tag-list-link" href="/blog/tags/miniprogram/" rel="tag">miniprogram</a></li><li class="post-tag-list-item"><a class="post-tag-list-link" href="/blog/tags/wechat/" rel="tag">wechat</a></li></ul>
+    
+
+    <a href="#top" class="top">返回顶部</a>
+  </div>
+</section>
+
+    </div>
+    <footer>
+  <p>&copy; 2020
+  
+  <a href="mailto:盛年不重来，一日难再晨" class="author">
+    盛年不重来，一日难再晨
+  </a>
+  
+  </p>
+</footer>
+  </body>
+</html>
