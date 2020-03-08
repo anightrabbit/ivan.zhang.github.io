@@ -1,6 +1,4 @@
 <!DOCTYPE html>
-<html>
-  <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
   <meta http-equiv="content-type" content="text/html; charset=utf-8">
@@ -14,22 +12,20 @@
   
     <meta name="description" content="anightrabbit@qq.com,记录,笔记">
   
-  <link rel="shortcut icon" type="image/x-icon" href="/blog/favicon.ico?v=1.02">
-
+  <link rel="shortcut icon" href="/blog/favicon.ico">
   
 <link rel="stylesheet" href="/blog/css/style.css">
 
-  <script type="text/javascript" src="/blog/js/scale.fix.js"></script>
   <!--[if lt IE 9]>
     <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
     <![endif]-->
 <meta name="generator" content="Hexo 4.2.0"></head>
-  <body>
+<body class="is-preload">
     <div class="wrapper">
       <header>
-  <h1>大海的世界全是水</h1>
+  <h1><a href="/">大海的世界全是水</a></h1>
   
-  <p>记录大海的撸码生活</p>
+  <p>记录大海的撸码生活，用海水来填坑</p>
   
   
   <ul>
@@ -48,10 +44,12 @@
       <ul class="post-tag-list" itemprop="keywords"><li class="post-tag-list-item"><a class="post-tag-list-link" href="/blog/tags/config/" rel="tag">config</a></li><li class="post-tag-list-item"><a class="post-tag-list-link" href="/blog/tags/git/" rel="tag">git</a></li><li class="post-tag-list-item"><a class="post-tag-list-link" href="/blog/tags/ssh-key/" rel="tag">ssh-key</a></li></ul>
     
   </div>
-   <div class="post-meta">
-    <p class="post-desc">实际工作中，经常会遇到需要在不同git仓库地址上开发多个项目的情况。既有github的账户，也有公司gitlab账户，有时候还会需要配置一些第三方的云源码仓库的git账户，这种情况下如何在本地电脑管理多个git账户密钥呢？</p>
+  
+  <div class="post-meta">
+    <p class="post-excerpt">实际工作中，经常会遇到需要在不同git仓库地址上开发多个项目的情况。既有github的账户，也有公司gitlab账户，有时候还会需要配置一些第三方的云源码仓库的git账户，这种情况下如何在本地电脑管理多个git账户密钥呢？</p>
     <p class="post-time">2020-03-04</p>
   </div>
+  
   <div class="post-content">
     <h3 id="1、查看是否配置全局git账户信息"><a href="#1、查看是否配置全局git账户信息" class="headerlink" title="1、查看是否配置全局git账户信息"></a>1、查看是否配置全局git账户信息</h3><pre><code>$ git config --global list</code></pre><h3 id="2、清除已配置的全局账户信息"><a href="#2、清除已配置的全局账户信息" class="headerlink" title="2、清除已配置的全局账户信息"></a>2、清除已配置的全局账户信息</h3><pre><code>$ git config —-global  --unset user.name ‘777_100008547104_anightrabbit’
 $ git config —-global  —-unset user.email 777_100008547104_anightrabbit@git.cloud.tencent.com</code></pre><p>默认情况下，全局账户最多只有一个，若设置，则本地git管理密钥时，默认读取id_rsa文件信息。若不删除，则需要使用相同的name和email信息，在github、gitlab以及其他云代码仓库使用。很显然，这种情况，操作约束性太高。</p>
@@ -84,11 +82,14 @@ $ ssh -T git@gitlab.dev.thomascook.com.cn</code></pre><p><img src="https://anigh
     <footer>
   <p>&copy; 2020
   
-  <a href="mailto:盛年不重来，一日难再晨" class="author">
+  <a href="mailto:anightrabbit@qq.com" class="author">
     盛年不重来，一日难再晨
   </a>
   
   </p>
 </footer>
-  </body>
+    
+<script src="/blog/js/main.js"></script>
+
+</body>
 </html>

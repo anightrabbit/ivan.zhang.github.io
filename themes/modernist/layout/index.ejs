@@ -1,4 +1,8 @@
 <%- partial('_partial/header') %>
 <section class="home">
-
+	<%if(site.tags.length){%>
+	<div class="tag-cloud">
+	<%- tagcloud(site.tags,{min_font:12,max_font:20,unit:'px',color: true,start_color:'rgba(183, 0, 255, 1)',end_color:'rgba(0,102,153,1)'}) %>
+	</div>
+	<%}%>
 </section>

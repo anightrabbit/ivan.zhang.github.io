@@ -1,10 +1,9 @@
-<!DOCTYPE html>
-<html>
-  <%- partial('_partial/head') %>
-  <body>
+<%- partial('_partial/head') %>
+<body class="is-preload">
     <div class="wrapper">
       <%- body %>
     </div>
     <%- partial('_partial/footer') %>
-  </body>
+    <%- js('/js/main.js') %>
+</body>
 </html>

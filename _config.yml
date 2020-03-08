@@ -4,10 +4,11 @@
 
 # Site
 title: 大海的世界全是水
-subtitle: '记录大海的撸码生活'
+subtitle: '记录大海的撸码生活，用海水来填坑'
 description: 'anightrabbit@qq.com,记录,笔记'
 keywords: '记录大海的撸码生活'
 author: '盛年不重来，一日难再晨'
+email: 'anightrabbit@qq.com'
 language: zh-CN
 timezone: ''
 
@@ -98,4 +99,7 @@ theme: modernist
 # Deployment
 ## Docs: https://hexo.io/docs/deployment.html
 deploy:
-  type: ''
+  type: 'git'
+  message: [message]
+  repo:     
+    github: git@github.com:anightrabbit/anightrabbit.github.io.git,master
