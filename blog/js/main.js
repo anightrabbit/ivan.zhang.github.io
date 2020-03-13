@@ -7,7 +7,7 @@
 (function() {
 
 	"use strict";
-	if (window.innerWidth < 741) return false;
+	if (window.innerWidth < 741 && !document.getElementById('index')) return false;
 	var $body = document.querySelector('body');
 
 	// Methods/polyfills.
