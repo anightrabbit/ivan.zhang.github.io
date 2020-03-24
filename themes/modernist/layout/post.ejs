@@ -11,7 +11,7 @@
   </div>
   <%if(page.excerpt){%>
   <div class="post-meta">
-    <%if(page.excerpt){%><p class="post-excerpt"><%= page.excerpt %></p><%}%>
+    <%if(page.excerpt){%><p class="post-excerpt"><%= page.excerpt || '' %></p><%}%>
     <%if(page.date){%><p class="post-time"><%- date(page.date, "YYYY-MM-DD") %></p><%}%>
   </div>
   <%}%>
